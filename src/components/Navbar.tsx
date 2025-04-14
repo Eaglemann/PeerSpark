@@ -13,7 +13,9 @@ const Navbar = () => {
               Profile
             </Link>
           </li>
-          <li className="hover:text-blue-600 cursor-pointer">Skills</li>
+          <Link to="/skills" className="hover:text-blue-600 cursor-pointer">
+            <li className="hover:text-blue-600 cursor-pointer">Skills</li>
+          </Link>
           <Link to="/matches" className="hover:text-blue-600 cursor-pointer">
             <li className="hover:text-blue-600 cursor-pointer">Matches</li>
           </Link>
