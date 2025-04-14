@@ -2,15 +2,15 @@ import React from "react";
 import { ApolloProvider } from "@apollo/client";
 import client from "./apolloClient";
 
-import Header from "./components/Header";
+import Navbar from "./components/Navbar";
 import Profile from "./components/Profile";
 
 const App: React.FC = () => {
   return (
     <ApolloProvider client={client}>
       <div className="App">
-        <Header />
-        <Profile />
+        <Navbar />
+        {/* <Profile /> */}
       </div>
     </ApolloProvider>
   );
