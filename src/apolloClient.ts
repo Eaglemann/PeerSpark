@@ -1,10 +1,10 @@
-import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: process.env.HASURA_GRAPHQL_URL, // use the env variable
+  uri: import.meta.env.VITE_HASURA_GRAPHQL_URL, // access via import.meta.env
   cache: new InMemoryCache(),
   headers: {
-    "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET || "", // use the env variable
+    "x-hasura-admin-secret": import.meta.env.VITE_HASURA_ADMIN_SECRET || "", // access via import.meta.env
   },
 });
 
