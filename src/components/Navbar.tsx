@@ -1,4 +1,4 @@
-import React from "react";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 const Navbar = () => {
   return (
@@ -8,7 +8,11 @@ const Navbar = () => {
           PeerSpark
         </div>
         <ul className="hidden md:flex gap-6 text-gray-600 font-medium">
-          <li className="hover:text-blue-600 cursor-pointer">Profile</li>
+          <li>
+            <Link to="/profile" className="hover:text-blue-600 cursor-pointer">
+              Profile
+            </Link>
+          </li>
           <li className="hover:text-blue-600 cursor-pointer">Skills</li>
           <li className="hover:text-blue-600 cursor-pointer">Matches</li>
         </ul>

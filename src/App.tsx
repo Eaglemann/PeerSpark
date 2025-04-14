@@ -1,18 +1,17 @@
-import React from "react";
-import { ApolloProvider } from "@apollo/client";
-import client from "./apolloClient";
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Profile from "./components/Profile";
+import Profile from "./components/Profile"; // Import Profile component
+import "./App.css";
 
-const App: React.FC = () => {
+const App = () => {
   return (
-    <ApolloProvider client={client}>
-      <div className="App">
-        <Navbar />
-        {/* <Profile /> */}
-      </div>
-    </ApolloProvider>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" />
+        <Route path="/profile" element={<Profile />} />
+      </Routes>
+    </Router>
   );
 };
 
