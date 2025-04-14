@@ -1,7 +1,8 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Profile from "./components/Profile"; // Import Profile component
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
+import Matches from "./components/Matches";
+import Navbar from "./components/Navbar";
+import Profile from "./components/Profile";
 
 const App = () => {
   return (
@@ -10,6 +11,7 @@ const App = () => {
       <Routes>
         <Route path="/" />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/matches" element={<Matches />} />
       </Routes>
     </Router>
   );
