@@ -4,9 +4,12 @@ const Navbar = () => {
   return (
     <nav className="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <div className="text-2xl font-bold text-blue-600 tracking-wide">
+        <Link
+          to="/"
+          className="text-2xl font-bold text-blue-600 tracking-wide"
+        >
           PeerSpark
-        </div>
+        </Link>
         <ul className="hidden md:flex gap-6 text-gray-600 font-medium">
           <li>
             <Link to="/profile" className="hover:text-blue-600 cursor-pointer">
