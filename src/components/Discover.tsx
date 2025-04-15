@@ -1,30 +1,30 @@
 import React, { useState } from "react";
-
+import { Link } from "react-router-dom";
 // Dummy data for users
 const users = [
   {
     id: 1,
     name: "Alice Johnson",
     image: "https://via.placeholder.com/150",
-    skills: ["React", "JavaScript", "GraphQL"]
+    skills: ["React", "JavaScript", "GraphQL"],
   },
   {
     id: 2,
     name: "Bob Smith",
     image: "https://via.placeholder.com/150",
-    skills: ["Node.js", "Express", "MongoDB"]
+    skills: ["Node.js", "Express", "MongoDB"],
   },
   {
     id: 3,
     name: "Charlie Brown",
     image: "https://via.placeholder.com/150",
-    skills: ["Python", "Django", "PostgreSQL"]
+    skills: ["Python", "Django", "PostgreSQL"],
   },
   {
     id: 4,
     name: "Dana White",
     image: "https://via.placeholder.com/150",
-    skills: ["Vue.js", "TypeScript", "GraphQL"]
+    skills: ["Vue.js", "TypeScript", "GraphQL"],
   },
 ];
 
@@ -46,7 +46,9 @@ const Discover = () => {
   return (
     <div className="max-w-7xl mx-auto py-12 px-4">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-800 mb-4">Discover Users</h2>
+        <h2 className="text-3xl font-extrabold text-gray-800 mb-4">
+          Discover Users
+        </h2>
         <input
           type="text"
           placeholder="Search by name"
@@ -70,13 +72,17 @@ const Discover = () => {
               />
             </div>
             <div className="text-center">
-              <div className="text-xl font-semibold text-gray-800 mb-2">{user.name}</div>
+              <div className="text-xl font-semibold text-gray-800 mb-2">
+                {user.name}
+              </div>
               <div className="text-sm text-gray-600 mb-4">
                 Skills: {user.skills.join(", ")}
               </div>
-              <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-300">
-                View Profile
-              </button>
+              <Link to={`/user/${user.id}`}>
+                <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-300">
+                  View Profile
+                </button>
+              </Link>
             </div>
           </div>
         ))}

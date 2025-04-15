@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Profile from "./components/Profile";
 import Skills from "./components/Skills";
 import Discover from "./components/Discover";
+import UserProfilePage from "./components/UserProfilePage";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/matches" element={<Matches />} />
         <Route path="/skills" element={<Skills />} />
+        <Route path="/user/:id" element={<UserProfilePage />} />
       </Routes>
     </Router>
   );
