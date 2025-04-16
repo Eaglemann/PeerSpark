@@ -21,11 +21,14 @@ export const GET_USER_BY_ID = gql`
     }
   }
 `;
-export const GET_SKILLS = gql`
-  query {
-    skills {
+export const GET_ALL_USERS = gql`
+  query GetAllUsers @cached {
+    users(where: { is_active: { _eq: true } }) {
       id
       name
+      email
+      profile_picture
+      bio
     }
   }
 `;
