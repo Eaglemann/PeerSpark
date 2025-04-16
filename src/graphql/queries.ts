@@ -1,18 +1,26 @@
 import { gql } from "@apollo/client";
 
-export const GET_USERS = gql`
-  query GetUsers {
-    users {
+export const GET_USER_BY_ID = gql`
+  query GetUserById($id: uuid!) @cached {
+    users_by_pk(id: $id) {
       id
       name
-      image
-      skills {
-        name
+      email
+      profile_picture
+      bio
+      is_active
+      created_at
+      updated_at
+      user_skills {
+        skill {
+          id
+          name
+          description
+        }
       }
     }
   }
 `;
-
 export const GET_SKILLS = gql`
   query {
     skills {

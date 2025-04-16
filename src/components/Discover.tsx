@@ -1,72 +1,39 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-// Dummy data for users
-const users = [
-  {
-    id: 1,
-    name: "Alice Johnson",
-    image: "https://via.placeholder.com/150",
-    skills: ["React", "JavaScript", "GraphQL"],
-  },
-  {
-    id: 2,
-    name: "Bob Smith",
-    image: "https://via.placeholder.com/150",
-    skills: ["Node.js", "Express", "MongoDB"],
-  },
-  {
-    id: 3,
-    name: "Charlie Brown",
-    image: "https://via.placeholder.com/150",
-    skills: ["Python", "Django", "PostgreSQL"],
-  },
-  {
-    id: 4,
-    name: "Dana White",
-    image: "https://via.placeholder.com/150",
-    skills: ["Vue.js", "TypeScript", "GraphQL"],
-  },
-];
+import { useParams } from "react-router-dom";
+import { useQuery } from "@apollo/client";
+import { GET_USER_BY_ID } from "../graphql/queries";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  profile_picture: string;
+  bio: string;
+}
 
 const Discover = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { id } = useParams<{ id: string }>();
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+  const { data, loading, error } = useQuery(GET_USER_BY_ID, {
+    variables: { id },
+  });
 
-  const filterUsers = (users: any) => {
-    return users.filter((user: any) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  };
+  const user: User = data?.users_by_pk;
 
-  const filteredUsers = filterUsers(users);
+  if (loading) return <div className="text-center py-10">Loading user...</div>;
+  if (error || !user)
+    return <div className="text-center py-10 text-red-500">User not found</div>;
 
   return (
     <div className="max-w-7xl mx-auto py-12 px-4">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-800 mb-4">
-          Discover Users
-        </h2>
-        <input
-          type="text"
-          placeholder="Search by name"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          className="px-6 py-3 border-2 border-gray-300 rounded-lg w-full sm:w-96 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-300"
-        />
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {filteredUsers.map((user: any) => (
+        {user.map((user: User) => (
           <div
             key={user.id}
             className="bg-white border border-gray-200 p-6 rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300"
           >
             <div className="flex justify-center mb-4">
               <img
-                src={user.image}
+                src={user.profile_picture || "https://placehold.co/400"}
                 alt={user.name}
                 className="w-32 h-32 object-cover rounded-full border-4 border-blue-500"
               />
@@ -76,7 +43,7 @@ const Discover = () => {
                 {user.name}
               </div>
               <div className="text-sm text-gray-600 mb-4">
-                Skills: {user.skills.join(", ")}
+                {/* Skills: {user.skills.join(", ")} */}
               </div>
               <Link to={`/user/${user.id}`}>
                 <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition duration-300">
