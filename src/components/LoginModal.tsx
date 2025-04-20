@@ -1,4 +1,6 @@
 import { useState } from "react";
+import axios from "axios";
+import ResetPasswordModal from "./ResetPasswordModal"; // import the modal
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -18,6 +20,8 @@ const LoginModal = ({
     password: "",
   });
 
+  const [showResetPassword, setShowResetPassword] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -25,34 +29,40 @@ const LoginModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://127.0.0.1:8000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_PEERSPARK_AUTH_URL}/auth/login`,
+        formData
+      );
 
-      const data = await response.json();
+      const data = response.data;
+      console.log("Login successful", data);
 
-      if (response.ok) {
-        console.log("Login successful", data);
-        localStorage.setItem("access_token", data.access_token);
-        onLoginSuccess?.();
-        onClose();
-      } else {
-        alert(data.detail || "Login failed");
-      }
-    } catch (error) {
-      alert("An error occurred. Please try again.");
+      localStorage.setItem("access_token", data.access_token);
+      onLoginSuccess?.();
+      onClose();
+    } catch (error: any) {
+      const message =
+        error.response?.data?.detail || "Login failed. Please try again.";
+      alert(message);
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || showResetPassword)
+    return (
+      <ResetPasswordModal
+        isOpen={showResetPassword}
+        onClose={() => {
+          setShowResetPassword(false);
+          onClose(); // optional: close entire login flow
+        }}
+        onSwitchToLogin={() => setShowResetPassword(false)}
+        onSwitchToRegister={onSwitchToRegister}
+      />
+    );
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-start pt-20 z-50">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md relative">
         <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">
           Welcome back
         </h2>
@@ -82,6 +92,15 @@ const LoginModal = ({
             Log in
           </button>
         </form>
+
+        <div className="mt-4 text-center text-sm">
+          <button
+            className="text-blue-600 hover:underline"
+            onClick={() => setShowResetPassword(true)}
+          >
+            Forgot password?
+          </button>
+        </div>
 
         <div className="mt-6 text-center text-sm text-gray-600">
           Don’t have an account?{" "}

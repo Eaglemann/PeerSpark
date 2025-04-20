@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import RegisterModal from "./RegisterModal";
-import LoginModal from "./LoginModal"; // Import the LoginModal
+import LoginModal from "./LoginModal";
 
 const Navbar = () => {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
