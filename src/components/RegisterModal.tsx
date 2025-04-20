@@ -27,7 +27,7 @@ const RegisterModal = ({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const baseUrl = process.env.PEERSPARK_AUTH_URL;
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -54,11 +54,14 @@ const RegisterModal = ({
       setErrorMsg("");
       setSuccessMsg("");
 
-      const response = await axios.post(`${baseUrl}/auth/register`, {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-        password: formData.password,
-      });
+      const response = await axios.post(
+        `${apiUrl}/auth/register`,
+        {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          password: formData.password,
+        }
+      );
 
       console.log(response);
 

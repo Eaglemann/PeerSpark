@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import RegisterModal from "./RegisterModal"; // adjust path as needed
+import RegisterModal from "./RegisterModal";
+import LoginModal from "./LoginModal"; // Import the LoginModal
 
 const Navbar = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   return (
     <>
@@ -33,7 +35,7 @@ const Navbar = () => {
           </ul>
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsLoginOpen(true)}
               className="text-blue-600 border border-blue-600 px-4 py-1 rounded-full hover:bg-blue-50"
             >
               Login
@@ -44,9 +46,29 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
+
+      {/* Register Modal */}
       <RegisterModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isRegisterOpen}
+        onClose={() => setIsRegisterOpen(false)}
+        onSwitchToLogin={() => {
+          setIsRegisterOpen(false);
+          setIsLoginOpen(true);
+        }}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onSwitchToRegister={() => {
+          setIsLoginOpen(false);
+          setIsRegisterOpen(true);
+        }}
+        onLoginSuccess={() => {
+          setIsLoginOpen(false);
+          // optionally trigger user state update here
+        }}
       />
     </>
   );
