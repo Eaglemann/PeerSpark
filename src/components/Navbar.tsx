@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import RegisterModal from "./RegisterModal";
 import LoginModal from "./LoginModal";
+import { useAuthStore } from "../store/auth";
 
 const Navbar = () => {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { user, logout } = useAuthStore();
 
   return (
     <>
@@ -33,21 +35,32 @@ const Navbar = () => {
               <li className="hover:text-blue-600 cursor-pointer">Matches</li>
             </Link>
           </ul>
+
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsLoginOpen(true)}
-              className="text-blue-600 border border-blue-600 px-4 py-1 rounded-full hover:bg-blue-50"
-            >
-              Login
-            </button>
-            <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
-              P
-            </div>
+            {user ? (
+              <>
+                <span className="text-gray-700 font-medium cursor-pointer hover:underline">
+                  {user.name}
+                </span>
+                <button
+                  onClick={logout}
+                  className="text-red-600 border border-red-600 px-4 py-1 rounded-full hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setIsLoginOpen(true)}
+                className="text-blue-600 border border-blue-600 px-4 py-1 rounded-full hover:bg-blue-50"
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
       </nav>
 
-      {/* Register Modal */}
       <RegisterModal
         isOpen={isRegisterOpen}
         onClose={() => setIsRegisterOpen(false)}
@@ -57,7 +70,6 @@ const Navbar = () => {
         }}
       />
 
-      {/* Login Modal */}
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
@@ -65,10 +77,7 @@ const Navbar = () => {
           setIsLoginOpen(false);
           setIsRegisterOpen(true);
         }}
-        onLoginSuccess={() => {
-          setIsLoginOpen(false);
-          // optionally trigger user state update here
-        }}
+        onLoginSuccess={() => setIsLoginOpen(false)}
       />
     </>
   );

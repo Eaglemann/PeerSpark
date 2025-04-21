@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import ResetPasswordModal from "./ResetPasswordModal"; // import the modal
+import { useAuthStore } from "../store/auth";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ const LoginModal = ({
     password: "",
   });
 
-  const [showResetPassword, setShowResetPassword] = useState(false);
+  const { setUser } = useAuthStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,6 +38,7 @@ const LoginModal = ({
       console.log("Login successful", data);
 
       localStorage.setItem("access_token", data.access_token);
+      setUser(data.user);
       onLoginSuccess?.();
       onClose();
     } catch (error: any) {
@@ -47,18 +48,7 @@ const LoginModal = ({
     }
   };
 
-  if (!isOpen || showResetPassword)
-    return (
-      <ResetPasswordModal
-        isOpen={showResetPassword}
-        onClose={() => {
-          setShowResetPassword(false);
-          onClose(); // optional: close entire login flow
-        }}
-        onSwitchToLogin={() => setShowResetPassword(false)}
-        onSwitchToRegister={onSwitchToRegister}
-      />
-    );
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-start pt-20 z-50">
@@ -93,22 +83,15 @@ const LoginModal = ({
           </button>
         </form>
 
-        <div className="mt-4 text-center text-sm">
+        <div className="mt-4 text-center text-sm text-gray-600">
           <button
-            className="text-blue-600 hover:underline"
-            onClick={() => setShowResetPassword(true)}
-          >
-            Forgot password?
-          </button>
-        </div>
-
-        <div className="mt-6 text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
-          <button
+            onClick={() => {
+              onClose();
+              onSwitchToRegister?.();
+            }}
             className="text-blue-600 hover:underline font-medium"
-            onClick={onSwitchToRegister}
           >
-            Register
+            Don’t have an account? Register
           </button>
         </div>
 
