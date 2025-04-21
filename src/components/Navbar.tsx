@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import RegisterModal from "./RegisterModal";
 import LoginModal from "./LoginModal";
 import { useAuthStore } from "../store/auth";
@@ -7,7 +7,14 @@ import { useAuthStore } from "../store/auth";
 const Navbar = () => {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const { user, logout } = useAuthStore();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const { logout } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+
+
+  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
 
   return (
     <>
@@ -19,43 +26,63 @@ const Navbar = () => {
           >
             PeerSpark
           </Link>
+
           <ul className="hidden md:flex gap-6 text-gray-600 font-medium">
             <li>
-              <Link
-                to="/profile"
-                className="hover:text-blue-600 cursor-pointer"
-              >
+              <Link to="/profile" className="hover:text-blue-600">
                 Profile
               </Link>
             </li>
-            <Link to="/skills" className="hover:text-blue-600 cursor-pointer">
-              <li className="hover:text-blue-600 cursor-pointer">Skills</li>
-            </Link>
-            <Link to="/matches" className="hover:text-blue-600 cursor-pointer">
-              <li className="hover:text-blue-600 cursor-pointer">Matches</li>
-            </Link>
+            <li>
+              <Link to="/skills" className="hover:text-blue-600">
+                Skills
+              </Link>
+            </li>
+            <li>
+              <Link to="/matches" className="hover:text-blue-600">
+                Matches
+              </Link>
+            </li>
           </ul>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 relative">
             {user ? (
-              <>
-                <span className="text-gray-700 font-medium cursor-pointer hover:underline">
-                  {user.name}
-                </span>
+              <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={logout}
-                  className="text-red-600 border border-red-600 px-4 py-1 rounded-full hover:bg-red-50"
+                  onClick={toggleDropdown}
+                  className="text-gray-700 font-medium hover:underline"
                 >
-                  Logout
+                  {user.name}
+                </button>
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 bg-white border rounded-md shadow-lg z-50">
+                    <button
+                      onClick={() => {
+                        logout();
+                        setDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsLoginOpen(true)}
+                  className="text-blue-600 border border-blue-600 px-4 py-1 rounded-full hover:bg-blue-50"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setIsRegisterOpen(true)}
+                  className="text-gray-700 border border-gray-300 px-4 py-1 rounded-full hover:bg-gray-100"
+                >
+                  Register
                 </button>
               </>
-            ) : (
-              <button
-                onClick={() => setIsLoginOpen(true)}
-                className="text-blue-600 border border-blue-600 px-4 py-1 rounded-full hover:bg-blue-50"
-              >
-                Login
-              </button>
             )}
           </div>
         </div>
