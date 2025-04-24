@@ -20,7 +20,7 @@ const LoginModal = ({
     password: "",
   });
 
-  const { setUser } = useAuthStore();
+  const { login } = useAuthStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -31,14 +31,16 @@ const LoginModal = ({
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_PEERSPARK_AUTH_URL}/auth/login`,
-        formData
+        formData,
+        {
+          withCredentials: true, // Ensure cookies are sent with the request
+        }
       );
 
       const data = response.data;
       console.log("Login successful", data);
 
-      localStorage.setItem("access_token", data.access_token);
-      setUser(data.user);
+      login(data.user, data.access_token);
       onLoginSuccess?.();
       onClose();
     } catch (error: any) {

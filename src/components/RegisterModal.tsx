@@ -43,12 +43,13 @@ const RegisterModal = ({
         {
           email: formData.email,
           password: formData.password,
+        },
+        {
+          withCredentials: true, // Ensure cookies are sent with the request
         }
       );
 
       const data = loginResponse.data;
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("user", JSON.stringify(data.user));
 
       login(data.user, data.access_token);
       onClose();
