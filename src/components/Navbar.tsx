@@ -1,8 +1,11 @@
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { isTokenExpired } from "../utils/jwt"; // Import the token expiration check
+import { useAuthStore } from "../store/auth";
 import { Link } from "react-router-dom";
 import { useState, useRef } from "react";
 import RegisterModal from "./RegisterModal";
 import LoginModal from "./LoginModal";
-import { useAuthStore } from "../store/auth";
 
 const Navbar = () => {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -10,9 +13,15 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const { logout } = useAuthStore();
-  const user = useAuthStore((state) => state.user);
+  const { logout, token, user } = useAuthStore();
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    if (token && isTokenExpired(token)) {
+      logout();
+      navigate("/");
+    }
+  }, [token, logout, navigate]);
 
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
 
@@ -60,6 +69,7 @@ const Navbar = () => {
                       onClick={() => {
                         logout();
                         setDropdownOpen(false);
+                        navigate("/");
                       }}
                       className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
                     >

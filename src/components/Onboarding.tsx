@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
+import ClipLoader from "react-spinners/ClipLoader";
 
 const skillOptions = [
   { value: "5aa26cd1-f195-4f8c-bf4a-3b0576fca703", label: "Python" },
@@ -56,36 +59,105 @@ const Onboarding = () => {
   const [skills, setSkills] = useState<{ value: string; label: string }[]>([]);
   const [location, setLocation] = useState("");
   const [occupation, setOccupation] = useState("");
-  const [age, setAge] = useState<number>();
+  const [age, setAge] = useState<number | undefined>();
   const [gender, setGender] = useState<{ value: string } | null>(null);
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+  const [loading, setLoading] = useState(false);
+  const [bio, setBio] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
 
   const navigate = useNavigate();
 
+  const isFormValid = () =>
+    skills.length >= 1 &&
+    skills.length <= 5 &&
+    location.trim() &&
+    occupation.trim() &&
+    age !== undefined &&
+    age >= 18 &&
+    gender !== null;
+
+  const validateField = (name: string) => {
+    if (!touched[name]) return "";
+
+    switch (name) {
+      case "skills":
+        return skills.length < 1 || skills.length > 5
+          ? "Select 1 to 5 skills."
+          : "";
+      case "location":
+        return location.trim() === "" ? "Location is required." : "";
+      case "occupation":
+        return occupation.trim() === "" ? "Profession is required." : "";
+      case "age":
+        return age === undefined || age < 18 ? "You must be at least 18." : "";
+      case "gender":
+        return gender === null ? "Gender is required." : "";
+      case "bio":
+        return bio.trim().length < 10
+          ? "Bio must be at least 10 characters."
+          : "";
+      default:
+        return "";
+    }
+  };
+
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const payload = {
-        skills: skills.map((skill) => ({ skill_id: skill.value })),
+        skills: skills.map((s) => ({ skill_id: s.value })),
         location,
         occupation,
-        age: Number(age),
+        age,
         gender: gender?.value,
+        bio,
       };
 
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_PEERSPARK_AUTH_URL}/auth/update-profile`,
         payload,
+        { withCredentials: true }
+      );
+
+      toast.success("Profile updated successfully!");
+      navigate("/profile", { replace: true });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save onboarding info.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!profileImage) return;
+    setUploading(true);
+    setUploadSuccess(false);
+
+    const formData = new FormData();
+    formData.append("file", profileImage);
+
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_PEERSPARK_AUTH_URL}/auth/upload-profile-image`,
+        formData,
         {
           withCredentials: true,
         }
       );
-      console.log("Profile updated successfully!", response.data);
 
-      navigate("/profile", { replace: true });
-    } catch (err) {
-      console.error(err);
-      alert("Failed to save onboarding info.");
+      setUploadSuccess(true);
+    } catch (error) {
+      toast.error("Failed to upload image. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
+
+  const errorStyle = "text-sm text-red-500 mt-1";
 
   return (
     <div className="min-h-screen flex justify-center items-start pt-20 bg-gray-100 px-4">
@@ -100,6 +172,36 @@ const Onboarding = () => {
           Welcome to PeerSpark 👋
         </h2>
 
+        {/* Image Upload */}
+
+        <div>
+          <label className="block mb-1 font-medium text-gray-700">
+            Profile Image
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                setProfileImage(e.target.files[0]);
+              }
+            }}
+          />
+          <button
+            type="button"
+            onClick={handleImageUpload}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            disabled={uploading || !profileImage}
+          >
+            {uploading
+              ? "Uploading..."
+              : uploadSuccess
+              ? "Uploaded ✅"
+              : "Upload Image"}
+          </button>
+        </div>
+
+        {/* Skills */}
         <div>
           <label className="block mb-1 font-medium text-gray-700">
             Skills (1–5)
@@ -109,15 +211,24 @@ const Onboarding = () => {
             options={skillOptions}
             value={skills}
             onChange={(selected) => setSkills(selected.slice(0, 5))}
+            onBlur={() => setTouched((t) => ({ ...t, skills: true }))}
             placeholder="Type and select skills..."
           />
-          {skills.length > 5 && (
-            <p className="text-red-500 text-sm mt-1">
-              You can select up to 5 skills.
-            </p>
-          )}
+          <AnimatePresence>
+            {validateField("skills") && (
+              <motion.div
+                className={errorStyle}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+              >
+                {validateField("skills")}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
+        {/* Location */}
         <div>
           <label className="block mb-1 font-medium text-gray-700">
             Location
@@ -128,10 +239,23 @@ const Onboarding = () => {
             placeholder="e.g. Berlin"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            required
+            onBlur={() => setTouched((t) => ({ ...t, location: true }))}
           />
+          <AnimatePresence>
+            {validateField("location") && (
+              <motion.div
+                className={errorStyle}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+              >
+                {validateField("location")}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
+        {/* Profession */}
         <div>
           <label className="block mb-1 font-medium text-gray-700">
             Profession
@@ -142,39 +266,108 @@ const Onboarding = () => {
             placeholder="e.g. Backend Developer"
             value={occupation}
             onChange={(e) => setOccupation(e.target.value)}
-            required
+            onBlur={() => setTouched((t) => ({ ...t, occupation: true }))}
           />
+          <AnimatePresence>
+            {validateField("occupation") && (
+              <motion.div
+                className={errorStyle}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+              >
+                {validateField("occupation")}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
+        {/* Age */}
         <div>
           <label className="block mb-1 font-medium text-gray-700">Age</label>
           <input
             type="number"
             className="w-full border px-3 py-2 rounded-md"
             placeholder="e.g. 28"
-            value={age}
+            value={age ?? ""}
             onChange={(e) => setAge(Number(e.target.value))}
+            onBlur={() => setTouched((t) => ({ ...t, age: true }))}
             min={18}
             max={100}
-            required
           />
+          <AnimatePresence>
+            {validateField("age") && (
+              <motion.div
+                className={errorStyle}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+              >
+                {validateField("age")}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
+        {/* Gender */}
         <div>
           <label className="block mb-1 font-medium text-gray-700">Gender</label>
           <Select
             options={genderOptions}
             value={gender}
-            onChange={(selectedOption) => setGender(selectedOption)}
+            onChange={(val) => setGender(val)}
+            onBlur={() => setTouched((t) => ({ ...t, gender: true }))}
             placeholder="Select gender"
           />
+          <AnimatePresence>
+            {validateField("gender") && (
+              <motion.div
+                className={errorStyle}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+              >
+                {validateField("gender")}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
+        {/* Bio */}
+        <div>
+          <label className="block mb-1 font-medium text-gray-700">Bio</label>
+          <textarea
+            className="w-full border px-3 py-2 rounded-md min-h-[80px]"
+            placeholder="Tell us a bit about yourself..."
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, bio: true }))}
+          />
+          <AnimatePresence>
+            {validateField("bio") && (
+              <motion.div
+                className={errorStyle}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+              >
+                {validateField("bio")}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700"
+          className={`w-full py-3 rounded-md font-semibold flex items-center justify-center ${
+            isFormValid() && !loading
+              ? "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-gray-400 cursor-not-allowed text-white"
+          }`}
+          disabled={!isFormValid() || loading}
         >
-          Continue
+          {loading ? <ClipLoader size={20} color="#fff" /> : "Continue"}
         </button>
       </form>
     </div>
