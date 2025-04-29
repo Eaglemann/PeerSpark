@@ -8,7 +8,7 @@ interface UserProfile {
   gender: string;
   created_at: string;
   skills: string[];
-  image_url?: string; // Optional image URL
+  profile_picture?: string; // Optional image URL
 }
 
 const Profile = () => {
@@ -32,7 +32,8 @@ const Profile = () => {
           gender: user.gender,
           created_at: user.created_at,
           skills: user.user_skills.map((entry: any) => entry.skill.name),
-          image_url: user.image_url || "https://placehold.co/600x400",
+          profile_picture:
+            user.profile_picture || "https://placehold.co/600x400",
         };
 
         setUserProfile(formattedProfile);
@@ -58,7 +59,7 @@ const Profile = () => {
         {/* Left: Image */}
         <div className="flex-shrink-0">
           <img
-            src={userProfile.image_url}
+            src={userProfile.profile_picture}
             alt="Profile"
             className="w-48 h-48 object-cover rounded-full border-4 border-indigo-200 shadow-md"
           />
